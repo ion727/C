@@ -73,6 +73,9 @@ The program calculates the runtime of the sorting process and prints it at the e
 - The program uses the `usleep()` function to create a delay between printing updates, so that the process can be visually tracked.
 - The program works with any integer input and can handle a wide range of values.
 
+## Current Identified Issue(s) in merge-sort.c:
+- Visual tracking misalligns in the presence of multi-digit numbers.
+
 ## Coming Soon:
 - `-h` and `--help` flags for information.
 - `-d` and `--delay` flags to set a delay (currently 500 ms by default).
