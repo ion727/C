@@ -15,7 +15,7 @@ This repository contains an implementation of the **Merge Sort** algorithm in C.
 ## Compilation:
 To compile the program, run the following command in your terminal:
 
-`gcc merge_sort.c -o merge_sort
+`gcc merge_sort.c -o merge_sort -lm`
 
 ## Usage:
 To use the program, run the compiled executable with a list of integers as command-line arguments. For example:
