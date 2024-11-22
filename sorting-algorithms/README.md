@@ -44,7 +44,8 @@ Runtime: 0.003274 seconds
 4. The program measures and prints the runtime of the sorting operation.
 
 ## Files:
-- `merge_sort.c`: The main C file containing the merge sort algorithm implementation.
+- `merge-sort.c`: The main C file containing the merge sort algorithm implementation.
+- `merge-sort`: The compiled binary of `merge-sort.c`.
   
 ## Code Breakdown:
 
