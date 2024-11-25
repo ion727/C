@@ -15,26 +15,14 @@ This repository contains an implementation of the **Merge Sort** algorithm in C.
 ## Compilation:
 To compile the program, run the following command in your terminal:
 
-`gcc merge_sort.c -o merge_sort -lm`
+`gcc merge_sort.c -o merge_sort.exe -lm`
 
 ## Usage:
 To use the program, run the compiled executable with a list of integers as command-line arguments. For example:
 
-`./merge_sort 5 3 8 1 9 2`
+`./merge_sort 5 3 8 1 9 2 -v --delay 100`
 
-This will sort the integers `5, 3, 8, 1, 9, 2` using the merge sort algorithm, display the process, and print the sorted list.
-
-### Example:
-
-```
-$ ./merge_sort 5 3 8 1 9 2
-output:
-[ 5 3 8 1 9 2 ]
-[ 1 3 5 8 9 2 ]
-[ 1 2 3 5 8 9 ]
-[ 1 2 3 5 8 9 ]
-Runtime: 0.003274 seconds
-```
+This will sort the integers `5, 3, 8, 1, 9, 2` using the merge sort algorithm, display the process with 100 ms between each frame, and print the sorted list.
 
 
 ## Explanation:
@@ -45,40 +33,22 @@ Runtime: 0.003274 seconds
 
 ## Files:
 - `merge-sort.c`: The main C file containing the merge sort algorithm implementation.
-- `merge-sort`: The compiled binary of `merge-sort.c`.
-  
-## Code Breakdown:
+- `merge-sort.exe`: The compiled binary of `merge-sort.c` for Windows.
 
-### `main` function:
-- Handles the input parsing and memory allocation for the array and sorted output.
-- Calls the `sort` function to begin the sorting process.
-- Prints the sorted array and the runtime after sorting.
-
-### `sort` function:
-- Recursively splits the array into two halves until the base case (array of length 1) is reached.
-- Merges the sorted subarrays back together in sorted order.
-- Prints the current state of the array before and after the merge operation.
-
-### Memory Allocation:
-- The program dynamically allocates memory for the input array (`args`) and the sorted array (`sorted`).
-- It checks for memory allocation failure and terminates with an error message if necessary.
-
-### Output:
-The program displays the current state of the array at each recursive step of the merge sort, so you can visualize the sorting process.
-
-### Runtime:
-The program calculates the runtime of the sorting process and prints it at the end. The runtime is measured in seconds and is printed with a precision of six decimal places.
+## Options:
+- `-h` and `--help` print a usage manual to stdout.
+- `-v` visually represents the sorting process. Implies `--delay 50` unless overriden.
+- `--delay time` sets a delay of <ins>time</ins> milliseconds between each frame of the sorting process. Overrides the delay from `-v`.
 
 ## Notes:
-- The program uses the `usleep()` function to create a delay between printing updates, so that the process can be visually tracked.
-- The program works with any integer input and can handle a wide range of values.
+- The program _*can*_ sort multi-digit & negative numbers, but fails to represent them when the `-v` option is included.
+- Make sure to place the numbers to sort **before** the options. Placing options before or in the list will replace final numbers with zeros.
 
 ## Current Identified Issue(s) in merge-sort.c:
-- Visual tracking misalligns in the presence of multi-digit numbers.
+- Visual tracking misalligns in the presence of multi-digit numbers (including negatives).
 
 ## Coming Soon:
-- `-h` and `--help` flags for information.
-- `-d` and `--delay` flags to set a delay (currently 500 ms by default).
+- Reading/writing to/from file.
 
 ## Author:
 ion727
