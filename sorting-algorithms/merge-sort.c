@@ -6,7 +6,9 @@
 #include <limits.h>
 #include <string.h>
 
-int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual);
+void printn(int n, char *character);
+int get_digits(int num);
+int *sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len);
 
 int main(int argc, char *argv[]){
     int delay = 0, visual = 0;
@@ -76,17 +78,25 @@ int main(int argc, char *argv[]){
         return 2;
     }
     argv++; // to ignore the filename at argv[0]
-    for (int i = 0; i < len; i++) {
-        args[i] = atoi(argv[i]);
+
+    int largest_len = 1;
+    for (int i = 0; i < len; i++) { // turn input into integers & find largest number
         sorted[i] = INT_MIN;
+        args[i] = atoi(argv[i]);
+        if (get_digits(args[i]) > largest_len) {
+            largest_len = get_digits(args[i]);
+        }   
     }
 
-    sort(args, len, args, len, sorted, delay, visual);
+    sort(args, len, args, len, sorted, delay, visual, largest_len); //=========================================\\ BEACON
     
-    printf("\r");
-    for (int i = 0; i < len; i++) {printf("%i ", args[i]);}
-    printf("\n");
-    for (int i = 0; i < len; i++) {printf("  ");}
+    printf("[ ");
+    for (int i = 0; i < len; i++) {
+        printf("%i", args[i]);
+        printn(largest_len - get_digits(args[i]) + 1, " ");
+    }
+    printf("]\n");
+    printn((largest_len + 1)*len, " ");
     printf("   \r");
     
     free(args);
@@ -98,7 +108,7 @@ int main(int argc, char *argv[]){
 }
 
 
-int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual) {
+int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len) {
     if (len <= 1) {
         return left;
     }
@@ -109,12 +119,11 @@ int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay,
     int offset = left - array;
     
     // sort left & right
-    left = sort(left, llen, array, arraylen, sorted, delay, visual);
-    right = sort(right, rlen, array, arraylen, sorted, delay, visual);
+    left = sort(left, llen, array, arraylen, sorted, delay, visual, digits_len);
+    right = sort(right, rlen, array, arraylen, sorted, delay, visual, digits_len);
 
-    // merge
     int leftpoint = 0, rightpoint = 0;
-    for (int i = 0; i < len; i++){
+    for (int i = 0; i < len; i++){ // iteratively merge
         if (leftpoint >= llen) {
             *(sorted + i + offset) = right[rightpoint];
             rightpoint++;
@@ -129,29 +138,64 @@ int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay,
             rightpoint++;
         }
     }
-    if (visual) {
-        printf("\r[ ");
-        for (int i = 0; i < arraylen; i++) {printf("%i ", array[i]);}
+
+    if (visual) { //visually display sorting
+        printf("[ ");
+        for (int i = 0; i < arraylen; i++) {
+            int missing_digits = digits_len - get_digits(array[i]);
+            if (sorted[i] == INT_MIN || sorted[i] == INT_MAX) {
+                printf("%i", array[i]);
+                printn(missing_digits," ");
+            } else {
+                printn(digits_len,"▓");
+            }
+            printf(" ");
+        }
         printf("]\n[ ");
         for (int i = 0; i < arraylen; i++) {
-            if (sorted[i] != INT_MIN && sorted[i] != INT_MAX) {
-                printf("\x1b[1A▓\x1b[1D\x1b[1B%i ", sorted[i]);
+            int missing_digits = digits_len - get_digits(array[i]);
+            if (!(sorted[i] == INT_MIN || sorted[i] == INT_MAX)) {
+                printf("%i", sorted[i]);
+                printn(missing_digits," ");
             } else if (sorted[i] == INT_MAX) {
-                printf("▓ ");
+                printn(digits_len,"▓");
             } else {
-                printf("░ ");
+                printn(digits_len,"░");
             }
+            printf(" ");
         }
-        printf("]\x1b[1A");
+        printf("]\x1b[1A\r");
         fflush(stdout);
     }
 
     // write back into `array`
     for (int i = 0; i < len; i++) {
         array[i + offset] = sorted[i + offset];
-        sorted[i + offset] = INT_MAX;
+        if (i == 0) {
+            sorted[i + offset] = INT_MAX;
+        } else {
+            sorted[i + offset] = INT_MIN;
+        }
     }
 
     usleep(delay * 1000);
     return left;
+}
+
+void printn(int n, char *character) {
+    for (int i = 0; i < n; i++) {
+        printf("%s", character);
+    }
+}
+
+int get_digits(int num) {
+    if (num == 0) {
+        return 1;
+    }
+    int count = 1;
+    if (num < 0) {
+        count++;
+        num = -num;
+    }
+    return (int) log10(num) + count;
 }
