@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <string.h>
 
+void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int digits_len);
 void printn(int n, char *character);
 int get_digits(int num);
 int *sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len);
@@ -65,7 +66,6 @@ int main(int argc, char *argv[]){
         printf("Usage: <%s> <int> <int> ... <int> [-h|--help] [-v] [--delay time].\nOutputs to stdio a sorted list using the provided integers.\n", argv[0]);
         return 1;
     } 
-    clock_t start = clock();
     // stores the length of the array of integers
     int len = argc - 1; 
 
@@ -88,7 +88,9 @@ int main(int argc, char *argv[]){
         }   
     }
 
+    clock_t start = clock();
     sort(args, len, args, len, sorted, delay, visual, largest_len); //=========================================\\ BEACON
+    clock_t end = clock();
     
     printf("[ ");
     for (int i = 0; i < len; i++) {
@@ -101,7 +103,6 @@ int main(int argc, char *argv[]){
     
     free(args);
     free(sorted);
-    clock_t end = clock();
     double runtime = (double)(end - start) / CLOCKS_PER_SEC;
     if (visual) {printf("Runtime: %.3f ms\n", runtime*1000);}
     return 0;
@@ -116,69 +117,48 @@ int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay,
     int llen = round(len/2.0);
     int rlen = len - llen;
     int *right = left + llen; // the pointer to the right array is at the first location
-    int offset = left - array;
+    const int offset = left - array;
     
     // sort left & right
     left = sort(left, llen, array, arraylen, sorted, delay, visual, digits_len);
     right = sort(right, rlen, array, arraylen, sorted, delay, visual, digits_len);
 
+    for (int i = 0; i < arraylen; i++) {
+        sorted[i] = INT_MIN;
+    }
+    for (int i = 0; i < len; i++) {
+        sorted[i + offset] = INT_MAX;
+    }
     int leftpoint = 0, rightpoint = 0;
     for (int i = 0; i < len; i++){ // iteratively merge
         if (leftpoint >= llen) {
             *(sorted + i + offset) = right[rightpoint];
+            right[rightpoint] = INT_MAX;
             rightpoint++;
         } else if (rightpoint >= rlen) {
             *(sorted + i + offset) = left[leftpoint];
             leftpoint++;
         } else if (left[leftpoint] < right[rightpoint]) {
             *(sorted + i + offset) = left[leftpoint];
+            left[leftpoint] = INT_MAX;
             leftpoint++;
         } else {
             *(sorted + i + offset) = right[rightpoint]; 
+            right[rightpoint] = INT_MAX;
             rightpoint++;
         }
+        frametick(array, arraylen, sorted, delay, visual, digits_len);
     }
 
-    if (visual) { //visually display sorting
-        printf("[ ");
-        for (int i = 0; i < arraylen; i++) {
-            int missing_digits = digits_len - get_digits(array[i]);
-            if (sorted[i] == INT_MIN || sorted[i] == INT_MAX) {
-                printf("%i", array[i]);
-                printn(missing_digits," ");
-            } else {
-                printn(digits_len,"▓");
-            }
-            printf(" ");
-        }
-        printf("]\n[ ");
-        for (int i = 0; i < arraylen; i++) {
-            int missing_digits = digits_len - get_digits(array[i]);
-            if (!(sorted[i] == INT_MIN || sorted[i] == INT_MAX)) {
-                printf("%i", sorted[i]);
-                printn(missing_digits," ");
-            } else if (sorted[i] == INT_MAX) {
-                printn(digits_len,"▓");
-            } else {
-                printn(digits_len,"░");
-            }
-            printf(" ");
-        }
-        printf("]\x1b[1A\r");
-        fflush(stdout);
-    }
 
     // write back into `array`
     for (int i = 0; i < len; i++) {
         array[i + offset] = sorted[i + offset];
-        if (i == 0) {
-            sorted[i + offset] = INT_MAX;
-        } else {
-            sorted[i + offset] = INT_MIN;
-        }
+        sorted[i + offset] = INT_MAX;
+        frametick(array, arraylen, sorted, delay, visual, digits_len);
+
     }
 
-    usleep(delay * 1000);
     return left;
 }
 
@@ -197,5 +177,40 @@ int get_digits(int num) {
         count++;
         num = -num;
     }
-    return (int) log10(num) + count;
+    return ((int)log10(num)) + count;
+}
+
+void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int digits_len) {
+    if (!visual) { //visually display sorting
+        return;
+    }
+
+    printf("[ ");
+    for (int i = 0; i < arraylen; i++) {
+        if (array[i] == INT_MAX) {
+            printn(digits_len,"▓");
+        } else {
+            int missing_digits = digits_len - get_digits(array[i]);
+            printf("%i", array[i]);
+            printn(missing_digits," ");
+        }
+        printf(" ");
+    }
+    printf("]\n\n[ ");
+    for (int i = 0; i < arraylen; i++) {
+        if (!(sorted[i] == INT_MIN || sorted[i] == INT_MAX)) {
+            printf("%i", sorted[i]);
+            int missing_digits = digits_len - get_digits(sorted[i]);
+            printn(missing_digits," ");
+        } else if (sorted[i] == INT_MAX) {
+            printn(digits_len,"▓");
+        } else {
+            printn(digits_len,"░");
+        }
+        printf(" ");
+    }
+    printf("]\x1b[2A\r");
+    fflush(stdout);
+    usleep(delay * 1000);
+    return;
 }
