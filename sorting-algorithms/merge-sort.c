@@ -5,19 +5,20 @@
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
+#include <ctype.h>
 
-void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int digits_len);
+int *sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime);
+void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime);
 void printn(int n, char *character);
 int get_digits(int num);
-int *sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len);
 
 int main(int argc, char *argv[]){
-    int delay = 0, visual = 0;
+    int delay = 0, visual = 0, runT = 0;
     for (int i = 0; i < argc; i++){
         if (argv[i][0] == '-') {
             if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
                 printf("Usage:\n"
-"program_name [-h | --help] [-v] [--delay <milliseconds>] <int> <int> ... <int>\n"
+"program_name [-h | --help] [-vr] [--delay <milliseconds>] <int> <int> ... <int>\n"
 "\n"
 "Description:\n"
 "This program sorts a list of integers using a recursive merge sort algorithm. The process is optionally visualized step-by-step in the terminal, and the runtime of the sorting operation is displayed at the end.\n"
@@ -31,7 +32,11 @@ int main(int argc, char *argv[]){
 "Displays this help page.\n"
 "\n"
 "-v\n"
-"Enables visualization of the sorting process. Visualization imposes a minimum delay of 50 ms (can be overriden with --delay 0 following -v).\n"
+"Enables visualization of the sorting process. Visualization imposes a minimum delay of 100 ms (can be overriden with --delay 0 following -v).\n"
+"Implies -r\n"
+"\n"
+"-r\n"
+"Displays the total time allocated to the program by the CPU (therefore excluding the delay when -v is specified).\n"
 "\n"
 "--delay <milliseconds>\n"
 "Specifies the delay (in milliseconds) between steps of the sorting visualization. This allows you to observe the merge sort process at your chosen speed.\n"
@@ -48,22 +53,30 @@ int main(int argc, char *argv[]){
 "The program assumes the input integers are valid. If the input is malformed (e.g., non-numeric values), unexpected behavior may occur.\n"
 "Ensure sufficient terminal width to visualize the sorting process effectively.\n");
                 return 0;
-            }
-            if (strcmp(argv[i], "-v") == 0) {
-                delay = 50;
+            } else if (strcmp(argv[i], "-v") == 0) {
+                delay = 100;
                 visual = 1;
-            }
-            if (strcmp(argv[i], "--delay") == 0) {
+                runT = 1;
+            } else if (strcmp(argv[i], "--delay") == 0) {
                 argc -= 2;
                 delay = atoi(argv[i+1]);
                 if (delay < 0) {
                     printf("Error: [--delay] flag takes positive integer.");
                 }
+            } else if (strcmp(argv[i], "-r") == 0) {
+                runT = 1;
+            } else {
+                for (int j = 1, l = strlen(argv[i]); j < l; j++) {
+                    if (!isdigit(argv[i][j])) {
+                        printf("Unrecognised option <%s>.\nUsage: <%s> <int> <int> ... <int> [-h|--help] [-vr] [--delay time].\n",argv[i], argv[0]);
+                        return 1;
+                    }
+                }
             }
         }
     }
     if (argc < 3) {
-        printf("Usage: <%s> <int> <int> ... <int> [-h|--help] [-v] [--delay time].\nOutputs to stdio a sorted list using the provided integers.\n", argv[0]);
+        printf("Usage: <%s> <int> <int> ... <int> [-h|--help] [-v] [--delay time].", argv[0]);
         return 1;
     } 
     // stores the length of the array of integers
@@ -88,8 +101,10 @@ int main(int argc, char *argv[]){
         }   
     }
 
+    double run = 0;
+    double *runtime = &run;
     clock_t start = clock();
-    sort(args, len, args, len, sorted, delay, visual, largest_len); //=========================================\\ BEACON
+    sort(args, len, args, len, sorted, delay, visual, largest_len, runtime); //=========================================\\ BEACON
     clock_t end = clock();
     
     printf("[ ");
@@ -103,13 +118,13 @@ int main(int argc, char *argv[]){
     
     free(args);
     free(sorted);
-    double runtime = (double)(end - start) / CLOCKS_PER_SEC;
-    if (visual) {printf("Runtime: %.3f ms\n", runtime*1000);}
+    *runtime += (double)(end - start) / CLOCKS_PER_SEC;
+    if (runT) {printf("Runtime: %.3f ms\n", *runtime*1000);}
     return 0;
 }
 
 
-int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len) {
+int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime) {
     if (len <= 1) {
         return left;
     }
@@ -120,8 +135,8 @@ int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay,
     const int offset = left - array;
     
     // sort left & right
-    left = sort(left, llen, array, arraylen, sorted, delay, visual, digits_len);
-    right = sort(right, rlen, array, arraylen, sorted, delay, visual, digits_len);
+    left = sort(left, llen, array, arraylen, sorted, delay, visual, digits_len, runtime);
+    right = sort(right, rlen, array, arraylen, sorted, delay, visual, digits_len, runtime);
 
     for (int i = 0; i < arraylen; i++) {
         sorted[i] = INT_MIN;
@@ -147,7 +162,7 @@ int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay,
             right[rightpoint] = INT_MAX;
             rightpoint++;
         }
-        frametick(array, arraylen, sorted, delay, visual, digits_len);
+        frametick(array, arraylen, sorted, delay, visual, digits_len, runtime);
     }
 
 
@@ -155,7 +170,7 @@ int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay,
     for (int i = 0; i < len; i++) {
         array[i + offset] = sorted[i + offset];
         sorted[i + offset] = INT_MAX;
-        frametick(array, arraylen, sorted, delay, visual, digits_len);
+        frametick(array, arraylen, sorted, delay, visual, digits_len, runtime);
 
     }
 
@@ -180,10 +195,11 @@ int get_digits(int num) {
     return ((int)log10(num)) + count;
 }
 
-void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int digits_len) {
-    if (!visual) { //visually display sorting
+void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime) { //visually display sorting
+    if (!visual) { 
         return;
     }
+    clock_t start = clock();
 
     printf("[ ");
     for (int i = 0; i < arraylen; i++) {
@@ -212,5 +228,7 @@ void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int
     printf("]\x1b[2A\r");
     fflush(stdout);
     usleep(delay * 1000);
+    clock_t end = clock();
+    *runtime -= (double)(end - start) / CLOCKS_PER_SEC;
     return;
 }
