@@ -9,14 +9,14 @@ This repository contains an implementation of the **Merge Sort** algorithm in C.
 - Provides a command-line interface for passing integers to be sorted.
 
 ## Requirements:
-- Standard C libraries (`stdio.h`, `stdlib.h`, `math.h`, `time.h`, `unistd.h`, `limits.h`)
+- Standard C libraries (`stdio.h`, `stdlib.h`, `math.h`, `time.h`, `unistd.h`, `limits.h`, `string.h`, `ctype.h`)
 
 ## Usage:
 To use the program, run the compiled executable with a list of integers as command-line arguments. For example:
 
-`./merge_sort 5 3 -8 1 97 2 -v --delay 100`
+`./merge_sort 5 3 -8 1 97 2 -v --delay 200`
 
-This will sort the integers `5, 3, -8, 1, 97, 2` using the merge sort algorithm, display the process with 100 ms between each frame, and print the sorted list.
+This will sort the integers `5, 3, -8, 1, 97, 2` using the merge sort algorithm, display the process with 200 ms between each frame, and print the sorted list.
 
 ## Files:
 - `merge-sort.c`: The main C file containing the merge sort algorithm implementation.
@@ -25,14 +25,15 @@ This will sort the integers `5, 3, -8, 1, 97, 2` using the merge sort algorithm,
 
 ## Options:
 - `-h` and `--help` print a usage manual to stdout.
-- `-v` visually represents the sorting process. Implies `--delay 50` unless overriden.
+- `-v` visually represents the sorting process. Implies `--delay 50` unless overriden. Implies `-r`.
+- `-r` upon completion, print the runtime
 - `--delay time` sets a delay of <ins>time</ins> milliseconds between each frame of the sorting process. Overrides the delay from `-v`.
 
 ## Note(s):
 - Make sure to place the numbers to sort **before** the options. Placing options before or in the list will replace final numbers with zeros.
 
 ## Current Identified Issue(s) in merge-sort.c:
-- None.
+- using the `-v` option slightly increases the runtime delay.
 
 ## Coming Soon:
 - Reading/writing to/from file.
