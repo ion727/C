@@ -26,14 +26,14 @@ This will sort the integers `5, 3, -8, 1, 97, 2` using the merge sort algorithm,
 ## Options:
 - `-h` and `--help` print a usage manual to stdout.
 - `-v` visually represents the sorting process. Implies `--delay 50` unless overriden. Implies `-r`.
-- `-r` upon completion, print the runtime
+- `-r` upon completion, print the runtime to stdout.
 - `--delay time` sets a delay of <ins>time</ins> milliseconds between each frame of the sorting process. Overrides the delay from `-v`.
 
 ## Note(s):
-- Make sure to place the numbers to sort **before** the options. Placing options before or in the list will replace final numbers with zeros.
+- Options can be specified anywhere among the arguments and will correctly be handled.
 
 ## Current Identified Issue(s) in merge-sort.c:
-- using the `-v` option slightly increases the runtime delay.
+- using the `-v` option considerably increases the calculated runtime.
 
 ## Coming Soon:
 - Reading/writing to/from file.
