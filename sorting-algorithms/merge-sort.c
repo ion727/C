@@ -8,13 +8,15 @@
 #include <ctype.h>
 
 int *sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime);
+int get_digits(int num);
 void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime);
 void printn(int n, char *character);
-int get_digits(int num);
+void realign(char **location, int n, int *argc, char **argv);
 
-int main(int argc, char *argv[]){
+int main(int argc, char **argv){
     int delay = 0, visual = 0, runT = 0;
     for (int i = 0; i < argc; i++){
+        printf("%s\n",argv[i]);
         if (argv[i][0] == '-') {
             if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
                 printf("Usage:\n"
@@ -57,14 +59,24 @@ int main(int argc, char *argv[]){
                 delay = 100;
                 visual = 1;
                 runT = 1;
+                realign(&argv[i], 1, &argc, argv);
+                i--;
             } else if (strcmp(argv[i], "--delay") == 0) {
-                argc -= 2;
-                delay = atoi(argv[i+1]);
                 if (delay < 0) {
-                    printf("Error: [--delay] flag takes positive integer.");
+                    printf("Error: [--delay] option takes positive integer as argument");
+                    return 1;
                 }
+                delay = atoi(argv[i+1]);
+                realign(&argv[i], 2, &argc, argv);
+                i--;
             } else if (strcmp(argv[i], "-r") == 0) {
                 runT = 1;
+                realign(&argv[i], 1, &argc, argv);
+                i--;
+            } else if (strcmp(argv[i], "-o") == 0) {
+                //print to file
+                realign(&argv[i], 2, &argc, argv);
+                i--;
             } else {
                 for (int j = 1, l = strlen(argv[i]); j < l; j++) {
                     if (!isdigit(argv[i][j])) {
@@ -193,6 +205,17 @@ int get_digits(int num) {
         num = -num;
     }
     return ((int)log10(num)) + count;
+}
+
+void realign(char **location, int n, int *argc, char **argv) {
+    *argc -= n;
+    // loop starting at location that takes i+1 and copies it into i, including the NULL.
+    for (int i = 0; location[i+n] != NULL; i++) {
+        location[i] = location[i+n];
+    }
+    for (int i = *argc, len = *argc + n; i < len; i++) {
+        argv[i] = NULL;
+    }
 }
 
 void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime) { //visually display sorting
