@@ -7,7 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 
-int *sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime);
+int* sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime);
 int get_digits(int num);
 void frametick(int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime);
 void printn(int n, char *character);
@@ -16,7 +16,6 @@ void realign(char **location, int n, int *argc, char **argv);
 int main(int argc, char **argv){
     int delay = 0, visual = 0, runT = 0;
     for (int i = 0; i < argc; i++){
-        printf("%s\n",argv[i]);
         if (argv[i][0] == '-') {
             if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
                 printf("Usage:\n"
@@ -136,7 +135,7 @@ int main(int argc, char **argv){
 }
 
 
-int * sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime) {
+int* sort(int *left, int len, int *array, int arraylen, int *sorted, int delay, int visual, int digits_len, double *runtime) {
     if (len <= 1) {
         return left;
     }
